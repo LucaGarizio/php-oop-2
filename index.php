@@ -1,140 +1,112 @@
-<!-- 
-Immaginare quali sono le classi necessarie per creare uno shop online con le seguenti caratteristiche:
-
-L'e-commerce vende prodotti per animali
-
-I prodotti sono categorizzati, le categorie sono Cani o Gatti
-
-I prodotti saranno oltre al cibo, anche giochi, cucce, etc
-
-Stampiamo delle card contenenti i dettagli dei prodotti, come immagine, titolo, prezzo, icona della categoria ed il tipo di articolo che si sta visualizzando (prodotto, cibo, gioco, cuccia, ecc). -->
-
 <?php
 
-class Prodotto {
-    private $id;
-    private $nome;
-    private $categoria;
-    private $prezzo;
-    private $tipoArticolo;
+class Product {
 
-    public function __construct($id, $nome, $categoria, $prezzo, $tipoArticolo) {
-        $this->id = $id;
-        $this->nome = $nome;
-        $this->categoria = $categoria;
-        $this->prezzo = $prezzo;
-        $this->tipoArticolo = $tipoArticolo;
+    private $title;
+    private $price;
+    private $category;
+    private $type;
+
+    public function __construct($title, $price, $category, $type) {
+   
+        $this->setTitle($title);
+        $this->setPrice($price);
+        $this->setCategory($category);
+        $this->setType($type);
     }
 
-    public function getId() {
-        return $this->id;
+    public function getTitle() {
+        return $this->title;
     }
 
-    public function getNome() {
-        return $this->nome;
+    public function setTitle($title) {
+        $this->title = $title;
     }
 
-    public function getCategoria() {
-        return $this->categoria;
+    public function getPrice() {
+        return $this->price;
     }
 
-    public function getPrezzo() {
-        return $this->prezzo;
+    public function setPrice($price) {
+        $this->price = $price;
     }
 
-    public function getTipoArticolo() {
-        return $this->tipoArticolo;
-    }
-}
 
-class Carrello {
-    private $prodotti = [];
-
-    public function aggiungiProdotto(Prodotto $prodotto) {
-        $this->prodotti[] = $prodotto;
+    public function getCategory() {
+        return $this->category;
     }
 
-    public function rimuoviProdotto($index) {
-        unset($this->prodotti[$index]);
-        $this->prodotti = array_values($this->prodotti);
+    public function setCategory($category) {
+        $this->category = $category;
     }
 
-    public function calcolaTotale() {
-        $totale = 0;
-        foreach ($this->prodotti as $prodotto) {
-            $totale += $prodotto->getPrezzo();
-        }
-        return $totale;
+
+    public function getType() {
+        return $this->type;
+    }
+
+    public function setType($type) {
+        $this->type = $type;
     }
 }
 
-class Categoria {
-    private $nome;
-    private $icona;
+class Category {
+    private $name;
+    private $products = [];
 
-    public function __construct($nome, $icona) {
-        $this->nome = $nome;
-        $this->icona = $icona;
+    public function __construct($name) {
+        $this->setName($name);
     }
 
-    public function getNome() {
-        return $this->nome;
+ 
+    public function getName() {
+        return $this->name;
     }
 
-    public function setNome($nome) {
-        $this->nome = $nome;
+    public function setName($name) {
+        $this->name = $name;
     }
 
-    public function getIcona() {
-        return $this->icona;
-    }
-
-    public function setIcona($icona) {
-        $this->icona = $icona;
+    public function addProduct($product) {
+        $this->products[] = $product;
     }
 }
 
-class CardStampata {
-    private $titolo;
-    private $prezzo;
-    private $iconaCategoria;
-    private $tipoArticolo;
 
-    public function __construct($titolo, $prezzo, $iconaCategoria, $tipoArticolo) {
-        $this->titolo = $titolo;
-        $this->prezzo = $prezzo;
-        $this->iconaCategoria = $iconaCategoria;
-        $this->tipoArticolo = $tipoArticolo;
-    }
-
-    public function stampa() {
-        echo "<div class='card'>";
-        echo "<h2>$this->titolo</h2>";
-        echo "<p>Prezzo: $this->prezzo</p>";
-        echo "<p>Tipo: $this->tipoArticolo</p>";
-        echo "<img src='$this->iconaCategoria' alt='Icona Categoria'>";
-        echo "</div>";
+trait Discountable {
+    public function calculateDiscountedPrice($discountPercentage) {
+        return $this->getPrice() * (1 - $discountPercentage / 100);
     }
 }
 
-// Esempio di utilizzo delle classi
-$prodotto1 = new Prodotto(1, "Cibo per cani", "Cani", 10.99, "Cibo");
-$prodotto2 = new Prodotto(2, "Giocattolo per gatti", "Gatti", 5.99, "Gioco");
 
-$carrello = new Carrello();
-$carrello->aggiungiProdotto($prodotto1);
-$carrello->aggiungiProdotto($prodotto2);
+class OutOfStockException extends Exception {
+    public function errorMessage() {
+        return "Questo prodotto è al momento non disponibile.";
+    }
+}
 
 
-$categoriaCani = new Categoria("Cani", "icona_cani.jpg");
-$categoriaGatti = new Categoria("Gatti", "icona_gatti.jpg");
+$categoryDogs = new Category("Cani");
+$categoryCats = new Category("Gatti");
 
-$card1 = new CardStampata($prodotto1->getNome(), $prodotto1->getPrezzo(), $categoriaCani->getIcona(), $prodotto1->getTipoArticolo());
-$card1->stampa();
+$product1 = new Product( "Cibo per Cani", 20, $categoryDogs, "cibo");
+$product2 = new Product( "Giocattolo per Gatti", 15, $categoryCats, "gioco");
 
-$card2 = new CardStampata($prodotto2->getNome(), $prodotto2->getPrezzo(), $categoriaGatti->getIcona(), $prodotto2->getTipoArticolo());
-$card2->stampa();
+$categoryDogs->addProduct($product1);
+$categoryCats->addProduct($product2);
 
-echo "Totale nel carrello: " . $carrello->calcolaTotale();
-?>
 
+class DiscountedProduct extends Product {
+    use Discountable;
+}
+
+$discountedProduct = new DiscountedProduct("Cuccia per Cani", 50, $categoryDogs, "cuccia");
+$discountedPrice = $discountedProduct->calculateDiscountedPrice(10); 
+
+
+try {
+    throw new OutOfStockException();
+} catch (OutOfStockException $e) {
+    echo "Errore: " . $e->errorMessage();
+}
