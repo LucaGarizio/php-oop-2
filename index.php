@@ -1,112 +1,108 @@
+<!-- ## Todo
+
+### Day 1
+Immaginare quali sono le classi necessarie per creare uno shop online con le seguenti caratteristiche:
+
+- L'e-commerce vende **prodotti** per animali
+- I prodotti sono categorizzati, le **categorie** sono `Cani` o `Gatti`
+- I prodotti saranno oltre al **cibo**, anche **giochi**, **cucce**, etc
+
+Stampiamo delle card contenenti i dettagli dei **prodotti**, come `immagine`, `titolo`, `prezzo`, `icona della categoria` ed il `tipo di articolo` che si sta visualizzando (prodotto, cibo, gioco, cuccia, ecc).
+
+### Day 2
+Aggiungere almeno un `trait` ed un `exception` (con al relativa gestione attraverso un `try-catch`) al vostro *shop*. -->
+
+
 <?php
 
-class Product {
-
-    private $title;
-    private $price;
-    private $category;
-    private $type;
-
-    public function __construct($title, $price, $category, $type) {
-   
-        $this->setTitle($title);
-        $this->setPrice($price);
-        $this->setCategory($category);
-        $this->setType($type);
-    }
-
-    public function getTitle() {
-        return $this->title;
-    }
-
-    public function setTitle($title) {
-        $this->title = $title;
-    }
-
-    public function getPrice() {
-        return $this->price;
-    }
-
-    public function setPrice($price) {
-        $this->price = $price;
-    }
-
-
-    public function getCategory() {
-        return $this->category;
-    }
-
-    public function setCategory($category) {
-        $this->category = $category;
-    }
-
-
-    public function getType() {
-        return $this->type;
-    }
-
-    public function setType($type) {
-        $this->type = $type;
-    }
-}
-
-class Category {
-    private $name;
-    private $products = [];
-
-    public function __construct($name) {
-        $this->setName($name);
-    }
-
- 
-    public function getName() {
-        return $this->name;
-    }
-
-    public function setName($name) {
-        $this->name = $name;
-    }
-
-    public function addProduct($product) {
-        $this->products[] = $product;
-    }
-}
-
-
-trait Discountable {
-    public function calculateDiscountedPrice($discountPercentage) {
-        return $this->getPrice() * (1 - $discountPercentage / 100);
-    }
-}
-
-
-class OutOfStockException extends Exception {
+class ProdottoInesistente extends Exception {
     public function errorMessage() {
-        return "Questo prodotto è al momento non disponibile.";
+        return "Prodotto non trovato. <br> <br>";
     }
 }
 
+class Product {
+    public $nome;
+    public $prezzo;
+    public $codiceProdotto;
 
-$categoryDogs = new Category("Cani");
-$categoryCats = new Category("Gatti");
+    function __construct($nome, $prezzo, $codiceProdotto) {
+        $this->nome = $nome;
+        $this->prezzo = $prezzo;
+        $this->codiceProdotto = $codiceProdotto;
+    }
 
-$product1 = new Product( "Cibo per Cani", 20, $categoryDogs, "cibo");
-$product2 = new Product( "Giocattolo per Gatti", 15, $categoryCats, "gioco");
-
-$categoryDogs->addProduct($product1);
-$categoryCats->addProduct($product2);
-
-
-class DiscountedProduct extends Product {
-    use Discountable;
+    function printCard() {
+        echo "Nome: " . $this->nome . '<br>';
+        echo "Prezzo: " . $this->prezzo . ' euro' . '<br>';
+        echo "Codice Prodotto: " . $this->codiceProdotto . '<br>';
+    }
 }
 
-$discountedProduct = new DiscountedProduct("Cuccia per Cani", 50, $categoryDogs, "cuccia");
-$discountedPrice = $discountedProduct->calculateDiscountedPrice(10); 
+class Cibo extends Product {
+    public $tipo;
+    public $peso;
+
+    function __construct($nome, $prezzo, $codiceProdotto, $tipo, $peso) {
+        parent::__construct($nome, $prezzo, $codiceProdotto);
+        $this->tipo = $tipo;
+        $this->peso = $peso;
+    }
+
+    function printCard() {
+        parent::printCard();
+        echo "Tipo: " . $this->tipo . '<br>';
+        echo "Peso: " . $this->peso;
+    }
+}
+
+class Cuccie extends Product {
+    public $materiale;
+    public $dimensione;
+
+    function __construct($nome, $prezzo, $codiceProdotto, $materiale, $dimensione) {
+        parent::__construct($nome, $prezzo, $codiceProdotto);
+        $this->materiale = $materiale;
+        $this->dimensione = $dimensione;
+    }
+
+    function printCard() {
+        parent::printCard();
+        echo "Materiale: " . $this->materiale . '<br>';
+        echo "Dimensione: " . $this->dimensione;
+    }
+}
+
+class Giochi extends Product {
+    public $materiale;
+    public $forma;
+
+    function __construct($nome, $prezzo, $codiceProdotto, $materiale, $forma) {
+        parent::__construct($nome, $prezzo, $codiceProdotto);
+        $this->materiale = $materiale;
+        $this->forma = $forma;
+    }
+
+    function printCard() {
+        parent::printCard();
+        echo "Materiale: " . $this->materiale . '<br>';
+        echo "Forma: " . $this->forma . '<br> <br>' ;
+    }
+}
 
 
 try {
-    throw new OutOfStockException();
-} catch (OutOfStockException $e) {
+    // Simulazione di un prodotto non trovato
+    throw new ProdottoInesistente();
+} catch (ProdottoInesistente $e) {
     echo "Errore: " . $e->errorMessage();
+} catch (Exception $e) {
+    echo "Errore generico: " . $e->getMessage();
 }
+
+$gioco = new Giochi('pupazzo', '15', 'C7ERTB', 'Tessuto', 'Cuore');
+$gioco->printCard();
+$cuccia = new Cuccie('cuccia per Cane', '100', 'CRZYLU', 'Legno', 'grande');
+$cuccia->printCard();
+
+?>
